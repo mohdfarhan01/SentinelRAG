@@ -1,42 +1,119 @@
 from __future__ import annotations
 
 import os
+import time
+
+import requests
 
 
 class LLMClient:
     """One swappable seam for the entire codebase.
 
     Defaults to a disabled STUB mode that requires no API key and makes no
-    network calls, so every other agent can be built and tested first.
-    Set GEMINI_API_KEY (and optionally GEMINI_MODEL) in the environment or
-    a .env file to enable real generation -- nothing else in the codebase
-    needs to change.
+    network calls, so every other agent works and is testable without one.
+
+    Provider selection:
+      - LLM_PROVIDER=gemini   -> Google Gemini (GEMINI_API_KEY, GEMINI_MODEL)
+      - LLM_PROVIDER=deepseek -> DeepSeek via chat.b.ai (BAI_API_KEY, BAI_MODEL)
+      - unset -> auto-detect: deepseek if BAI_API_KEY is set, else gemini
+        if GEMINI_API_KEY is set, else disabled (STUB mode)
+
+    Nothing outside this file should know or care which provider is
+    active -- every caller only ever uses `.enabled` and `.generate(...)`.
     """
 
     def __init__(self) -> None:
-        self.api_key = os.getenv("GEMINI_API_KEY")
-        self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-        self._model = None
+        provider = os.getenv("LLM_PROVIDER", "").strip().lower()
+        bai_key = os.getenv("BAI_API_KEY")
+        gemini_key = os.getenv("GEMINI_API_KEY")
 
-        if self.api_key:
+        if not provider:
+            if bai_key:
+                provider = "deepseek"
+            elif gemini_key:
+                provider = "gemini"
+
+        self.provider = provider or "stub"
+
+        self._gemini_client = None
+        self._gemini_model = None
+        self._bai_key = None
+        self._bai_base_url = None
+        self._bai_model = None
+
+        if self.provider == "gemini" and gemini_key:
             try:
-                import google.generativeai as genai
+                from google import genai
 
-                genai.configure(api_key=self.api_key)
-                self._model = genai.GenerativeModel(self.model_name)
+                self._gemini_client = genai.Client(api_key=gemini_key)
+                self._gemini_model = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
             except ImportError:
-                self._model = None
+                self._gemini_client = None
+
+        elif self.provider == "deepseek" and bai_key:
+            self._bai_key = bai_key
+            self._bai_base_url = os.getenv("BAI_BASE_URL", "https://api.b.ai/v1")
+            self._bai_model = os.getenv("BAI_MODEL", "deepseek-v4-flash")
 
     @property
     def enabled(self) -> bool:
-        return self._model is not None
+        return self._gemini_client is not None or self._bai_key is not None
 
     def generate(self, system_prompt: str, user_prompt: str) -> str:
-        if not self._model:
-            raise RuntimeError(
-                "LLM not configured. Set GEMINI_API_KEY to enable real "
-                "generation, or rely on the deterministic template answers "
-                "used automatically in stub mode."
-            )
-        response = self._model.generate_content(f"{system_prompt}\n\n{user_prompt}")
+        if self._gemini_client is not None:
+            return self._generate_with_retry(self._generate_gemini, system_prompt, user_prompt)
+        if self._bai_key is not None:
+            return self._generate_with_retry(self._generate_bai, system_prompt, user_prompt)
+        raise RuntimeError(
+            "LLM not configured. Set GEMINI_API_KEY or BAI_API_KEY to enable "
+            "real generation, or rely on the deterministic template answers "
+            "used automatically in stub mode."
+        )
+
+    def _generate_with_retry(self, fn, system_prompt: str, user_prompt: str, attempts: int = 2) -> str:
+        # Providers occasionally return transient 5xx errors under load.
+        # One short retry avoids a demo query needlessly falling back to
+        # the template answer over a passing blip. Callers still wrap
+        # this in their own try/except for a final template fallback.
+        last_error = None
+        for attempt in range(attempts):
+            try:
+                return fn(system_prompt, user_prompt)
+            except Exception as exc:  # noqa: BLE001 - deliberately broad, see above
+                last_error = exc
+                if attempt < attempts - 1:
+                    time.sleep(1.5)
+        raise last_error
+
+    def _generate_gemini(self, system_prompt: str, user_prompt: str) -> str:
+        from google.genai import types
+
+        response = self._gemini_client.models.generate_content(
+            model=self._gemini_model,
+            contents=user_prompt,
+            config=types.GenerateContentConfig(system_instruction=system_prompt),
+        )
         return (response.text or "").strip()
+
+    def _generate_bai(self, system_prompt: str, user_prompt: str) -> str:
+        resp = requests.post(
+            f"{self._bai_base_url}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {self._bai_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": self._bai_model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        # This provider also returns a separate "reasoning_content" field
+        # (the model's chain-of-thought) alongside "content" -- we only
+        # want the final answer.
+        return (data["choices"][0]["message"]["content"] or "").strip()

@@ -41,7 +41,10 @@ def main() -> None:
     store = DocumentStore.from_json_file(args.documents)
     pipeline = SentinelRAGPipeline(store)
 
-    mode = "LIVE (Gemini)" if pipeline.llm_client.enabled else "STUB (no LLM key set)"
+    if pipeline.llm_client.enabled:
+        mode = f"LIVE ({pipeline.llm_client.provider})"
+    else:
+        mode = "STUB (no LLM key set)"
     result = pipeline.run(user, args.question)
 
     console.print(

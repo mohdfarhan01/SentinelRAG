@@ -74,4 +74,5 @@ class SentinelRAGPipeline:
                 "blocked": blocked_count,
             },
             "conflicts": [c.title for c in self.conflict_resolver.last_conflicts],
+            "llm_mode": self.llm_client.provider if self.llm_client.enabled else "stub",
         }

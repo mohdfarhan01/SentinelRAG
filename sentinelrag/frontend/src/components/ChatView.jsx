@@ -7,6 +7,7 @@ export default function ChatView({ token }) {
   const [entries, setEntries] = useState([]);
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState("");
+  const [llmMode, setLlmMode] = useState(null);
 
   async function handleAsk(e) {
     e.preventDefault();
@@ -17,6 +18,7 @@ export default function ChatView({ token }) {
     try {
       const result = await askQuestion(token, asked);
       setEntries((prev) => [{ question: asked, ...result }, ...prev]);
+      setLlmMode(result.llm_mode);
       setQuestion("");
     } catch (err) {
       setError(err.message || "Something went wrong reaching the API.");
@@ -27,7 +29,14 @@ export default function ChatView({ token }) {
 
   return (
     <div className="main-panel">
-      <h1 className="panel-heading">Ask the enterprise knowledge base</h1>
+      <div className="panel-heading-row">
+        <h1 className="panel-heading">Ask the enterprise knowledge base</h1>
+        {llmMode && (
+          <span className={`mode-badge ${llmMode === "stub" ? "stub" : "live"}`}>
+            {llmMode === "stub" ? "Template mode" : `Live (${llmMode})`}
+          </span>
+        )}
+      </div>
       <p className="panel-subtext">
         Every answer is built only from documents you're authorized to see.
       </p>

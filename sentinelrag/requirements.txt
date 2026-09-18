@@ -2,9 +2,12 @@ rich>=13.0
 python-dotenv>=1.0
 pytest>=7.0
 
-# Optional: only needed if you set GEMINI_API_KEY to enable real LLM
-# answers. The pipeline runs fully in deterministic STUB mode without it.
-google-generativeai>=0.7
+# Optional: only needed to enable real LLM answers (GEMINI_API_KEY or
+# BAI_API_KEY). The pipeline runs fully in deterministic STUB mode
+# without either configured. DeepSeek (via chat.b.ai) uses the `requests`
+# dependency below directly, since its API is OpenAI-compatible over
+# plain HTTP -- no separate SDK needed.
+google-genai>=2.0
 
 # Phase 1/2: API backend, auth, and GUI
 fastapi>=0.110

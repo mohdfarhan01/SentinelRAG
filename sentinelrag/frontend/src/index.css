@@ -466,16 +466,41 @@ a:focus-visible {
   }
 }
 
+.panel-heading-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 4px;
+}
+
 .panel-heading {
   font-size: 1.125rem;
   font-weight: 600;
-  margin: 0 0 4px;
+  margin: 0;
 }
 
 .panel-subtext {
   color: var(--ink-soft);
   font-size: 0.9375rem;
   margin: 0 0 24px;
+}
+
+.mode-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+
+.mode-badge.live {
+  background: var(--tier-public-tint);
+  color: var(--tier-public);
+}
+
+.mode-badge.stub {
+  background: var(--paper);
+  color: var(--ink-faint);
+  border: 1px solid var(--border);
 }
 
 .ask-row {
