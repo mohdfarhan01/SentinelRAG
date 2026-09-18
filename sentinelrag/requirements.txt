@@ -20,3 +20,9 @@ requests>=2.31
 # Real document ingestion (PDF / DOCX)
 pypdf>=4.0
 python-docx>=1.1
+
+# Optional: semantic retrieval (RetrievalAgent falls back to keyword-only
+# matching if this isn't installed or its local index can't be created).
+# Uses Chroma's bundled default embedding model -- local, no API key,
+# though it downloads a small model file from Hugging Face on first use.
+chromadb>=0.5.0

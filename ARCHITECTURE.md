@@ -7,11 +7,14 @@
 > `sentinelrag/README.md` (setup + status), `sentinelrag/DEMO.md` (verified
 > live demo script), and the root `README.md` (submission form, kept in
 > sync with reality). Notable drift from this plan: SQLite instead of
-> PostgreSQL/Chroma (no vector store yet — retrieval is keyword-based, see
-> Future Scope in the root README), one agentic tool-calling loop instead
-> of two separate agents (no dedicated Conflict Resolution Agent — the
-> single agent discloses conflicts inline), and DeepSeek V4 Flash /
-> Gemini instead of Claude as the LLM provider. The core Evidence Firewall
+> PostgreSQL, one agentic tool-calling loop instead of two separate
+> agents (no dedicated Conflict Resolution Agent — the single agent
+> discloses conflicts inline, see Future Scope in the root README), and
+> DeepSeek V4 Flash / Gemini instead of Claude as the LLM provider.
+> Retrieval matches this plan closely: hybrid keyword + ChromaDB semantic
+> search, fused via reciprocal rank fusion, exactly as designed here (the
+> ChromaDB integration itself was adapted from a teammate's separate
+> prototype). The core Evidence Firewall
 > design described below — retrieval and authorization fused into one
 > tool, unauthorized content never reaching the LLM — was implemented
 > exactly as designed.

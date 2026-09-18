@@ -122,13 +122,13 @@ Other | bcrypt + JWT (auth), pypdf / python-docx (real file ingestion)
 Working:
 Full pipeline live end to end: login, agentic search + answer, citations, audit trace - all 3 official PS14 tests pass.
 Real LLM (DeepSeek V4 Flash) generating grounded, cited answers with zero unauthorized exposure, verified live.
+Hybrid semantic + keyword retrieval (ChromaDB, local embeddings): paraphrased questions with no shared exact words are still found.
 Admin document upload (PDF/DOCX/TXT) with manual classification/ACL, searchable immediately, no reindex step.
 Redacted audit trace UI, proven (tested + verified in-browser) not to leak blocked-document metadata to non-admins.
 Partly working, mocked, or hard-coded:
-Retrieval is keyword-based, not semantic embeddings - works well at demo scale, a known and documented limitation.
 Demo corpus is curated/seeded; bulk upload of "thousands of documents" at real enterprise scale is untested.
+Semantic retrieval embeds whole title+content per document, no chunking yet - fine at these document lengths.
 Not working or not built yet:
-Semantic/vector retrieval (RAG) - the retrieval interface is designed to swap it in without touching security code.
 A dedicated second "conflict resolution" agent for genuinely ambiguous cross-document disagreement.
 An automated, parametrized security test matrix beyond the existing authorization and leakage test suites.
 What we'd most like to be judged on:
@@ -136,23 +136,23 @@ The agent's own tool-calling: on a vague question it searched once, got nothing,
 
 10. Future Scope
 Idea 1
-Name: Semantic Retrieval (RAG upgrade)
-What it is: Replace keyword-only retrieval with an embeddings + vector-store hybrid, behind the exact same tool interface.
-Why it matters: Keyword matching misses paraphrased questions; this is the main known gap at real enterprise scale.
-How we'd build it: sentence-transformers embeddings + a vector store, fused with existing keyword search via rank fusion; retrieval interface stays unchanged.
-Done when: A paraphrased question sharing none of a document's exact words still retrieves it correctly.
-Idea 2
 Name: Dedicated Conflict Resolution Agent
 What it is: A second LLM call, triggered only when two authorized documents genuinely tie, to phrase the disclosure separately from the main answer.
 Why it matters: Keeps the primary agent's prompt focused and makes conflict-handling independently testable.
 How we'd build it: Trigger on the existing version resolver's tie-detection; hand off only the conflicting evidence, nothing else.
 Done when: A synthetic tie between two same-effective-date documents produces a two-sided disclosure from the second agent, not the first.
-Idea 3 (Optional)
+Idea 2
 Name: Security Test Matrix
 What it is: Parametrized tests over Users x Roles x Documents x Classifications x document status (active/revoked/future-dated).
 Why it matters: Turns "0% unauthorized exposure" from a claim into a continuously-checked, reportable number.
 How we'd build it: pytest.mark.parametrize over the existing authorization engine, plus prompt-injection fixtures, run in CI.
 Done when: CI reports "N cases, 0 leaks" and fails the build if that ever changes.
+Idea 3 (Optional)
+Name: Chunking for Long Documents
+What it is: Split long documents into passages before embedding, so citations point at a specific section instead of a whole document.
+Why it matters: Current semantic retrieval embeds whole title+content; fine at demo scale, weaker on real multi-page policies.
+How we'd build it: Chunk at ingestion, embed each chunk, resolve authorization at the parent-document level so access control doesn't change.
+Done when: A citation from a long uploaded document points at the specific passage the answer actually used.
 
 11. Additional Notes (Optional)
 This form summarizes a fully working implementation, verified live end to end, not a plan. Full technical detail (diagrams, threat model, schema) is in ARCHITECTURE.md; setup/run instructions in sentinelrag/README.md; a verified live demo script in sentinelrag/DEMO.md. Team details above are placeholders pending finalization.
