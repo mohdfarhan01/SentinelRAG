@@ -1,7 +1,20 @@
 # PS14 — Secure Enterprise Research Agent
-## Implementation Blueprint (Planning Document — Not Final Documentation)
+## Implementation Blueprint (Original Design Document)
 
-> Status: **Architecture & planning only.** No application code has been written yet. This document is the design the team implements from.
+> Status: **Implemented and verified live**, with some intentional drift from
+> this original plan — this document is preserved as the design rationale,
+> not as a current-state description. For what's actually built, see
+> `sentinelrag/README.md` (setup + status), `sentinelrag/DEMO.md` (verified
+> live demo script), and the root `README.md` (submission form, kept in
+> sync with reality). Notable drift from this plan: SQLite instead of
+> PostgreSQL/Chroma (no vector store yet — retrieval is keyword-based, see
+> Future Scope in the root README), one agentic tool-calling loop instead
+> of two separate agents (no dedicated Conflict Resolution Agent — the
+> single agent discloses conflicts inline), and DeepSeek V4 Flash /
+> Gemini instead of Claude as the LLM provider. The core Evidence Firewall
+> design described below — retrieval and authorization fused into one
+> tool, unauthorized content never reaching the LLM — was implemented
+> exactly as designed.
 >
 > Source of truth for requirements: `Problem_statement.txt` ("The Employee Who Asked for Too Much"). Every mandatory requirement below is traced back to it. Anything beyond that is explicitly marked **[Our Enhancement]**.
 

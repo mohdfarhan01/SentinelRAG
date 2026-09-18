@@ -9,13 +9,12 @@ pytest>=7.0
 # plain HTTP -- no separate SDK needed.
 google-genai>=2.0
 
-# Phase 1/2: API backend, auth, and GUI
+# Web API: backend, auth, and admin document uploads
 fastapi>=0.110
 uvicorn[standard]>=0.29
 python-multipart>=0.0.9
 bcrypt>=4.0
 PyJWT>=2.8
-streamlit>=1.32
 requests>=2.31
 
 # Real document ingestion (PDF / DOCX)
