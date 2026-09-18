@@ -6,7 +6,7 @@ written from the roadmap's aspiration, but confirmed to actually produce
 this behavior. Answer wording will vary slightly each run (it's a real
 LLM), but the structure and security outcome are consistent.
 
-**Total time: ~4 minutes for beats A–D, +1–2 minutes if you add E.**
+**Total time: ~4 minutes for beats A–D, +2–3 minutes if you add E and F.**
 
 ---
 
@@ -114,7 +114,24 @@ Say out loud:
 
 ---
 
-## Beat E — Real file upload (optional, if there's time)
+## Beat E — Execution trace, and the redaction inside it
+
+**Still logged in as `admin`, on the answer from Beat D**, click **"Show
+execution trace"** under the answer. Point out the "Agent search" step
+and the queries listed under it — this is the agent's own reformulated
+search attempts, not something narrated after the fact.
+
+**Then log out, log in as `u301` (Finance), ask any Q4 revenue
+question, and expand its trace too.** Point out the difference directly:
+
+> "Same feature, different audience. My admin trace can show exactly
+> which document got denied and why. This one can't — it shows the
+> count, not the identity, of what got blocked. Even the audit trail
+> itself won't leak metadata to someone who isn't authorized to see it."
+
+---
+
+## Beat F — Real file upload (optional, if there's time)
 
 **As `admin`, go to Upload documents.** Upload any real file you have on
 hand (`.txt`, `.md`, `.pdf`, or `.docx`) — a real policy doc works best.
@@ -125,12 +142,6 @@ audience, so they see it's admin-entered, not inferred.
 whichever demo user matches the access you just granted it. Point out
 the document now appears in the table below the form, and is
 immediately searchable — no reindex step, no restart.
-
-*(A fuller execution-trace panel — showing the agent's own search
-queries and reformulations step by step, not just the final firewall
-counts — is on the roadmap but not built yet. For now, the tool-call
-trace is visible in the `agent_tool_calls` table in `sentinelrag.db` if
-you want to show it via a quick query, but it's not in the UI.)*
 
 ---
 
