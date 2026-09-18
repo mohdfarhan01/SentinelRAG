@@ -68,6 +68,16 @@ export async function uploadDocument(token, fields, file) {
   return res.json();
 }
 
+export async function getAuditTrace(token, queryId) {
+  const res = await fetch(`${API_BASE}/audit/${queryId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    throw new Error(await parseErrorDetail(res));
+  }
+  return res.json();
+}
+
 export function tierSlug(classification) {
   return (classification || "internal").toLowerCase();
 }

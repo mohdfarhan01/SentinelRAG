@@ -1,5 +1,6 @@
 import { useState } from "react";
 import EvidenceFirewall from "./EvidenceFirewall";
+import TracePanel from "./TracePanel";
 import { askQuestion } from "../api";
 
 export default function ChatView({ token }) {
@@ -103,6 +104,8 @@ export default function ChatView({ token }) {
               </ul>
             </div>
           )}
+
+          <TracePanel token={token} queryId={entry.query_id} />
         </div>
       ))}
     </div>

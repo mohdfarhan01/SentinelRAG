@@ -21,6 +21,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 
 from sentinel.audit import AuditLog
+from sentinel.audit_trace import build_trace
 from sentinel.auth import create_access_token, decode_access_token, verify_password
 from sentinel.document_repository import DocumentRepository
 from sentinel.ingestion import extract_text
@@ -150,3 +151,16 @@ async def upload_document(
 @app.get("/documents")
 def list_documents(claims: dict = Depends(require_admin)):
     return documents.list_metadata()
+
+
+@app.get("/audit/{query_id}")
+def get_audit_trace(query_id: str, claims: dict = Depends(get_current_claims)):
+    # Redaction happens in build_trace, not here -- admins get every
+    # denied document's id and reason; everyone else gets their own
+    # query's trace with denials reduced to a count, never per-document
+    # detail. Treat "not yours" and "doesn't exist" identically (404),
+    # so this endpoint can't be used to probe which query_ids exist.
+    trace = build_trace(audit, query_id, claims["sub"], bool(claims.get("is_admin")))
+    if trace is None:
+        raise HTTPException(status_code=404, detail="Query not found")
+    return trace

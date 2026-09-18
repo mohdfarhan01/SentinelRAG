@@ -726,6 +726,98 @@ a:focus-visible {
   font-size: 0.875rem;
 }
 
+.trace-block {
+  margin-top: 20px;
+}
+
+.trace-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.trace-toggle:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.trace-panel {
+  margin-top: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.trace-steps {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trace-step {
+  display: flex;
+  gap: 10px;
+  font-size: 0.8125rem;
+  padding-left: 14px;
+  border-left: 2px solid var(--border);
+}
+
+.trace-stage {
+  flex-shrink: 0;
+  width: 110px;
+  color: var(--ink-soft);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.trace-detail {
+  color: var(--ink);
+}
+
+.trace-searches {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.trace-search-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trace-search-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.8125rem;
+}
+
+.trace-search-query {
+  color: var(--ink);
+}
+
+.trace-search-stats {
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.trace-footnote {
+  margin: 14px 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
 .history-divider {
   border: none;
   border-top: 1px solid var(--border);

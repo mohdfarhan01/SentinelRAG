@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlite3
 import threading
 from datetime import datetime, timezone
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS queries (
@@ -117,6 +117,49 @@ class AuditLog:
                 (query_id, answer, retrieved, authorized, blocked),
             )
             self._conn.commit()
+
+    def get_query_info(self, query_id: str) -> Optional[dict]:
+        row = self._conn.execute(
+            "SELECT query_id, user_id, question, created_at FROM queries WHERE query_id = ?",
+            (query_id,),
+        ).fetchone()
+        if not row:
+            return None
+        return {"query_id": row[0], "user_id": row[1], "question": row[2], "created_at": row[3]}
+
+    def get_decisions(self, query_id: str) -> List[dict]:
+        rows = self._conn.execute(
+            "SELECT document_id, allowed, reason FROM authorization_decisions WHERE query_id = ?",
+            (query_id,),
+        ).fetchall()
+        return [{"document_id": r[0], "allowed": bool(r[1]), "reason": r[2]} for r in rows]
+
+    def get_evidence(self, query_id: str) -> List[dict]:
+        rows = self._conn.execute(
+            "SELECT document_id, version FROM evidence_used WHERE query_id = ?",
+            (query_id,),
+        ).fetchall()
+        return [{"document_id": r[0], "version": r[1]} for r in rows]
+
+    def get_tool_calls(self, query_id: str) -> List[dict]:
+        rows = self._conn.execute(
+            "SELECT call_index, search_query, retrieved_count, authorized_count, blocked_count "
+            "FROM agent_tool_calls WHERE query_id = ? ORDER BY call_index",
+            (query_id,),
+        ).fetchall()
+        return [
+            {"call_index": r[0], "query": r[1], "retrieved": r[2], "authorized": r[3], "blocked": r[4]}
+            for r in rows
+        ]
+
+    def get_answer_record(self, query_id: str) -> Optional[dict]:
+        row = self._conn.execute(
+            "SELECT answer, retrieved_count, authorized_count, blocked_count FROM answers WHERE query_id = ?",
+            (query_id,),
+        ).fetchone()
+        if not row:
+            return None
+        return {"answer": row[0], "retrieved": row[1], "authorized": row[2], "blocked": row[3]}
 
     def close(self) -> None:
         self._conn.close()
