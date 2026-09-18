@@ -1,0 +1,17 @@
+Finance Department - Expense Reimbursement Policy
+
+All employee travel expenses exceeding 5,000 rupees require written
+pre-approval from the requesting employee's department head before the
+trip is booked. Expenses below this threshold may be submitted for
+reimbursement after the fact, with itemized receipts, within 30 days.
+
+International travel expenses are reimbursed at actual cost up to a cap
+of 200,000 rupees per trip, inclusive of airfare, lodging, and per-diem
+meal allowance of 3,000 rupees per day.
+
+Client entertainment expenses require both the department head's
+approval and a brief written justification describing the business
+purpose, attached to the reimbursement request.
+
+Any expense claim submitted more than 90 days after the expense date will
+be rejected unless approved directly by the CFO.

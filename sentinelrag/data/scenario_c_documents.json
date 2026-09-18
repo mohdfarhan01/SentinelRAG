@@ -1,0 +1,22 @@
+[
+  {
+    "document_id": "DOC-301",
+    "title": "Q4 Forecast",
+    "classification": "Internal",
+    "allowed_departments": ["Finance"],
+    "allowed_roles": ["Finance"],
+    "version": "1.0",
+    "effective_date": "2026-06-01",
+    "content": "Q4 projected revenue is 110 crore."
+  },
+  {
+    "document_id": "DOC-302",
+    "title": "Q4 Forecast",
+    "classification": "Internal",
+    "allowed_departments": ["Finance"],
+    "allowed_roles": ["Finance"],
+    "version": "2.0",
+    "effective_date": "2026-09-01",
+    "content": "Q4 projected revenue is 125 crore."
+  }
+]

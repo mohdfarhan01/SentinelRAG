@@ -1,0 +1,22 @@
+[
+  {
+    "document_id": "DOC-101",
+    "title": "Q4 Revenue Forecast",
+    "classification": "Internal",
+    "allowed_departments": ["Finance"],
+    "allowed_roles": ["Finance"],
+    "version": "2.0",
+    "effective_date": "2026-09-01",
+    "content": "Q4 projected revenue is 120 crore."
+  },
+  {
+    "document_id": "DOC-102",
+    "title": "Engineering Roadmap",
+    "classification": "Internal",
+    "allowed_departments": ["Engineering"],
+    "allowed_roles": ["Engineer"],
+    "version": "1.0",
+    "effective_date": "2026-08-01",
+    "content": "The next platform release is planned for October."
+  }
+]

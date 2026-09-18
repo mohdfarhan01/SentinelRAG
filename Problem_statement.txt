@@ -1,0 +1,125 @@
+The Employee Who Asked for Too Much
+
+Context
+Your company has thousands of internal documents. Employees can ask questions such as:
+"What was the revenue forecast for Q4?"
+An AI assistant should be able to search documents, understand them, compare information and answer questions. But not every employee is allowed to access every document. Documents have classifications:
+Public
+Internal
+Confidential
+Restricted
+Different employees have different permissions. The assistant must answer a question without exposing information that the employee is not authorized to access. Documents may also:
+contradict each other 
+be outdated 
+have different versions 
+contain incomplete information 
+Critical requirement
+An unauthorized document must never be provided to the LLM simply because it is relevant to the question.
+
+The Challenge
+Build a secure enterprise research agent that answers employee questions over internal documents while enforcing authorization. Documents have classifications and access rules. Relevant information that the requesting employee is not authorized to access must never be provided to the language model or revealed in the final answer.
+Core Requirements
+Accept a natural-language employee question and user context.
+Ingest documents with classification, department, owner, and access-control metadata.
+Search for relevant candidates but enforce authorization before document content reaches the LLM.
+Handle outdated and conflicting authorized documents.
+Return an answer with citations to the evidence the user is allowed to access.
+Record an audit trail of the request, authorization decisions, and evidence used.
+Safely respond when the answer exists only in documents the user cannot access.
+Inputs Students Can Test
+Test Input A — Authorized answer
+user.json:
+{
+  "user_id": "U102",
+  "role": "Finance",
+  "department": "Finance",
+  "clearance": "Internal"
+}
+
+documents.json:
+[
+  {
+    "document_id": "DOC-101",
+    "title": "Q4 Revenue Forecast",
+    "classification": "Internal",
+    "allowed_departments": ["Finance"],
+    "allowed_roles": ["Finance"],
+    "version": "2.0",
+    "effective_date": "2026-09-01",
+    "content": "Q4 projected revenue is 120 crore."
+  },
+  {
+    "document_id": "DOC-102",
+    "title": "Engineering Roadmap",
+    "classification": "Internal",
+    "allowed_departments": ["Engineering"],
+    "allowed_roles": ["Engineer"],
+    "version": "1.0",
+    "effective_date": "2026-08-01",
+    "content": "The next platform release is planned for October."
+  }
+]
+
+prompt:
+"What is the Q4 revenue forecast?
+Test Input B — Relevant but unauthorized
+user.json:
+{
+  "user_id": "U205",
+  "role": "Marketing",
+  "department": "Marketing",
+  "clearance": "Internal"
+}
+
+documents.json:
+[
+  {
+    "document_id": "DOC-201",
+    "title": "Q4 Revenue Forecast",
+    "classification": "Restricted",
+    "allowed_departments": ["Executive"],
+    "allowed_roles": ["Executive"],
+    "version": "3.0",
+    "effective_date": "2026-09-01",
+    "content": "Q4 projected revenue is 145 crore."
+  }
+]
+
+prompt:
+"What is the Q4 revenue forecast?
+Test Input C — Authorized conflict
+user.json:
+{
+  "user_id": "U301",
+  "role": "Finance",
+  "department": "Finance",
+  "clearance": "Internal"
+}
+
+documents.json:
+[
+  {
+    "document_id": "DOC-301",
+    "title": "Q4 Forecast",
+    "classification": "Internal",
+    "allowed_departments": ["Finance"],
+    "allowed_roles": ["Finance"],
+    "version": "1.0",
+    "effective_date": "2026-06-01",
+    "content": "Q4 projected revenue is 110 crore."
+  },
+  {
+    "document_id": "DOC-302",
+    "title": "Q4 Forecast",
+    "classification": "Internal",
+    "allowed_departments": ["Finance"],
+    "allowed_roles": ["Finance"],
+    "version": "2.0",
+    "effective_date": "2026-09-01",
+    "content": "Q4 projected revenue is 125 crore."
+  }
+]
+
+prompt:
+"What is the latest Q4 revenue forecast?
+

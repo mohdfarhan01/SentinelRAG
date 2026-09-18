@@ -1,0 +1,12 @@
+[
+  {
+    "document_id": "DOC-201",
+    "title": "Q4 Revenue Forecast",
+    "classification": "Restricted",
+    "allowed_departments": ["Executive"],
+    "allowed_roles": ["Executive"],
+    "version": "3.0",
+    "effective_date": "2026-09-01",
+    "content": "Q4 projected revenue is 145 crore."
+  }
+]
