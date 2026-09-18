@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 from sentinel.audit import AuditLog
 from sentinel.audit_trace import build_trace
-from sentinel.auth import create_access_token, decode_access_token, verify_password
+from sentinel.auth import create_access_token, decode_access_token, hash_password, verify_password
 from sentinel.document_repository import DocumentRepository
 from sentinel.ingestion import extract_text
 from sentinel.models import User
@@ -53,8 +53,27 @@ pipeline = SentinelRAGPipeline(documents, audit_log=audit)
 
 security = HTTPBearer()
 
+# Self-service signup MUST NOT let a client choose its own privileges --
+# that would be a total, one-request privilege escalation in a system
+# whose entire premise is that authorization can't be gamed. Every
+# account created through /auth/signup gets exactly this role,
+# department, and clearance, unconditionally. Elevated access is
+# something an admin grants afterward (e.g. by editing the users table),
+# never something requested at signup time.
+SIGNUP_ROLE = "Employee"
+SIGNUP_DEPARTMENT = "General"
+SIGNUP_CLEARANCE = "Public"
+MIN_PASSWORD_LENGTH = 8
+
 
 class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class SignupRequest(BaseModel):
+    # Deliberately ONLY username + password. Do not add role, department,
+    # clearance, or is_admin fields here -- see SIGNUP_ROLE etc. above.
     username: str
     password: str
 
@@ -83,6 +102,41 @@ def login(body: LoginRequest):
         # Same error for "no such user" and "wrong password" -- do not
         # reveal which one it was.
         raise HTTPException(status_code=401, detail="Invalid username or password")
+    token = create_access_token(record)
+    return {
+        "access_token": token,
+        "user": {
+            "user_id": record.user_id,
+            "username": record.username,
+            "role": record.role,
+            "department": record.department,
+            "clearance": record.clearance,
+            "is_admin": record.is_admin,
+        },
+    }
+
+
+@app.post("/auth/signup")
+def signup(body: SignupRequest):
+    username = body.username.strip()
+    if not username:
+        raise HTTPException(status_code=400, detail="Username is required")
+    if len(body.password) < MIN_PASSWORD_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Password must be at least {MIN_PASSWORD_LENGTH} characters",
+        )
+    if users.get_by_username(username):
+        raise HTTPException(status_code=409, detail="That username is already taken")
+
+    record = users.create_user(
+        username=username,
+        password_hash=hash_password(body.password),
+        role=SIGNUP_ROLE,
+        department=SIGNUP_DEPARTMENT,
+        clearance=SIGNUP_CLEARANCE,
+        is_admin=False,
+    )
     token = create_access_token(record)
     return {
         "access_token": token,

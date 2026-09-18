@@ -1,15 +1,10 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import BrandMark from "./BrandMark";
+import ThemeSwitcher from "./ThemeSwitcher";
 import { login } from "../api";
 
-const TIERS = [
-  { name: "Public", tier: "public", note: "Visible to everyone in the company" },
-  { name: "Internal", tier: "internal", note: "Visible to your department or role" },
-  { name: "Confidential", tier: "confidential", note: "Visible only to named departments" },
-  { name: "Restricted", tier: "restricted", note: "Visible only to named roles, such as Executive" },
-];
-
-export default function LoginScreen({ onLoggedIn }) {
+export default function SignIn({ onLoggedIn }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,10 +25,16 @@ export default function LoginScreen({ onLoggedIn }) {
   }
 
   return (
-    <div className="login-screen">
-      <div className="login-form-side">
-        <div className="login-card">
+    <div className="auth-screen">
+      <div className="auth-screen-top">
+        <Link to="/" className="auth-brand-link">
           <BrandMark />
+        </Link>
+        <ThemeSwitcher />
+      </div>
+
+      <div className="auth-card-wrap">
+        <div className="auth-card">
           <h1>Sign in to your workspace</h1>
           <p className="subtitle">
             Answers are scoped to what your role, department, and clearance
@@ -68,6 +69,10 @@ export default function LoginScreen({ onLoggedIn }) {
             </button>
           </form>
 
+          <p className="auth-switch">
+            New here? <Link to="/signup">Create an account</Link>
+          </p>
+
           <div className="demo-hint">
             Demo accounts (password <span className="mono">password123</span>):{" "}
             <span className="mono">u102</span> Finance,{" "}
@@ -76,25 +81,6 @@ export default function LoginScreen({ onLoggedIn }) {
             <span className="mono">admin</span> Admin.
           </div>
         </div>
-      </div>
-
-      <div className="login-ledger-side">
-        <p className="ledger-eyebrow">How access is decided</p>
-        <ul className="ledger-tier-list">
-          {TIERS.map((t) => (
-            <li key={t.tier} className="ledger-tier-row">
-              <span className={`ledger-tier-swatch tier-${t.tier}`} />
-              <span className="ledger-tier-text">
-                <span className="ledger-tier-name">{t.name}</span>
-                <span className="ledger-tier-note">{t.note}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-        <p className="ledger-footnote">
-          A document's classification and a person's clearance are checked
-          before any content reaches the model, not after.
-        </p>
       </div>
     </div>
   );
