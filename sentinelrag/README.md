@@ -29,6 +29,17 @@ script, see [`DEMO.md`](DEMO.md).
 - **Real document ingestion** — `.txt`, `.md`, `.pdf`, `.docx` via the
   admin upload endpoint, with classification/ACL always entered by hand,
   never inferred from content.
+- **Hybrid semantic + keyword retrieval** — a ChromaDB-backed semantic
+  search (local embedding model, no API key), adapted from a teammate's
+  separate SentinelRAG prototype, fused with the original keyword matcher
+  via Reciprocal Rank Fusion, so a paraphrased question sharing none of a
+  document's exact words is still found, without regressing exact-term/ID
+  lookups (`sentinel/vector_store.py`, `sentinel/semantic_retrieval.py`,
+  `sentinel/hybrid_retrieval.py`). Both the agentic and deterministic
+  paths pick this up automatically; falls
+  back to keyword-only if chromadb isn't installed. The vector index is
+  never trusted as a system of record -- every hit is resolved back to
+  the live document before authorization ever sees it.
 - **Full audit trail** — every query, authorization decision, and agent
   search is logged; visible in the UI as a per-answer execution trace,
   redacted for non-admins so the trace itself can't leak metadata.
@@ -41,9 +52,6 @@ script, see [`DEMO.md`](DEMO.md).
 
 ## Not built (see `ARCHITECTURE.md` and `ROADMAP.md` for the plan)
 
-- Semantic/embedding-based retrieval — current retrieval is
-  keyword/token-overlap only. Real, not a placeholder, but not RAG in
-  the vector-search sense.
 - A dedicated second "conflict resolution" LLM agent for genuinely
   ambiguous cross-document conflicts (today, the single answer-generation
   call handles this directly, and does so honestly rather than guessing —
@@ -60,6 +68,10 @@ sentinelrag/
 │   ├── authorization.py     # AuthorizationGatekeeper -- the security kernel
 │   ├── conflict_resolver.py # version resolution
 │   ├── retrieval.py         # keyword retrieval
+│   ├── vector_store.py      # ChromaDB index (semantic retrieval)
+│   ├── semantic_retrieval.py# same interface as retrieval.py, embeddings-backed
+│   ├── hybrid_retrieval.py  # fuses both via Reciprocal Rank Fusion
+│   ├── retrieval_factory.py # picks hybrid if chromadb is available, else keyword-only
 │   ├── agent_tools.py       # DocumentSearchTool -- the one LLM-facing tool
 │   ├── agent_loop.py        # agentic orchestration
 │   ├── answer_synthesis.py  # deterministic-path answer generation

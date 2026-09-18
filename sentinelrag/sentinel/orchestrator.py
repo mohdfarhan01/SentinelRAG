@@ -14,7 +14,7 @@ from .document_store import DocumentStore
 from .llm_client import LLMClient
 from .models import User
 from .query_planner import QueryPlanningAgent
-from .retrieval import RetrievalAgent
+from .retrieval_factory import create_retrieval_agent
 
 
 class SentinelRAGPipeline:
@@ -38,13 +38,16 @@ class SentinelRAGPipeline:
 
     def __init__(self, document_store: DocumentStore, audit_log: Optional[AuditLog] = None) -> None:
         self.document_store = document_store
-        self.retrieval = RetrievalAgent()
+        # One retrieval backend, shared by both paths below, so the RAG
+        # upgrade (if chromadb is available) applies whether or not an
+        # LLM is configured -- not just to the deterministic fallback.
+        self.retrieval = create_retrieval_agent()
         self.gatekeeper = AuthorizationGatekeeper()
         self.conflict_resolver = ConflictResolver()
         self.llm_client = LLMClient()
         self.query_planner = QueryPlanningAgent(self.llm_client)
         self.answer_agent = AnswerSynthesisAgent(self.llm_client)
-        self.agent_loop = AgentLoop(self.llm_client)
+        self.agent_loop = AgentLoop(self.llm_client, retrieval_agent=self.retrieval)
         self.audit = audit_log or AuditLog()
         self._agentic_enabled = os.getenv("AGENTIC_MODE", "true").strip().lower() != "false"
 

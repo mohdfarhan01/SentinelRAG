@@ -41,8 +41,9 @@ class AgentLoop:
     content or search unboundedly.
     """
 
-    def __init__(self, llm_client: LLMClient) -> None:
+    def __init__(self, llm_client: LLMClient, retrieval_agent=None) -> None:
         self.llm_client = llm_client
+        self.retrieval_agent = retrieval_agent
 
     def run(
         self,
@@ -51,7 +52,9 @@ class AgentLoop:
         all_documents: List[Document],
         today: Optional[date] = None,
     ) -> dict:
-        tool = DocumentSearchTool(user, all_documents, today, max_calls=MAX_TOOL_CALLS)
+        tool = DocumentSearchTool(
+            user, all_documents, today, max_calls=MAX_TOOL_CALLS, retrieval_agent=self.retrieval_agent
+        )
 
         try:
             raw_answer = self.llm_client.run_agent_loop(

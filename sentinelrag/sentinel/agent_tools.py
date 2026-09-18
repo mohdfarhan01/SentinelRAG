@@ -6,7 +6,7 @@ from typing import List, Optional
 from .authorization import AuthorizationGatekeeper
 from .conflict_resolver import ConflictResolver
 from .models import Document, User
-from .retrieval import RetrievalAgent
+from .retrieval_factory import create_retrieval_agent
 
 # OpenAI-compatible function-calling schema for providers (like DeepSeek via
 # chat.b.ai) that need an explicit JSON schema rather than introspecting a
@@ -61,6 +61,7 @@ class DocumentSearchTool:
         all_documents: List[Document],
         today: Optional[date] = None,
         max_calls: int = 3,
+        retrieval_agent=None,
     ) -> None:
         self._user = user
         self._all_documents = all_documents
@@ -68,7 +69,7 @@ class DocumentSearchTool:
         self._max_calls = max_calls
         self._total_calls = 0
 
-        self.retrieval = RetrievalAgent()
+        self.retrieval = retrieval_agent or create_retrieval_agent()
         self.gatekeeper = AuthorizationGatekeeper()
         self.conflict_resolver = ConflictResolver()
         self.call_log: List[dict] = []
