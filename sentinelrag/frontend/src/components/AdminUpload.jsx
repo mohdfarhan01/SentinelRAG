@@ -91,132 +91,141 @@ export default function AdminUpload({ token }) {
       </p>
 
       <form className="upload-form" onSubmit={handleSubmit}>
-        <div className="radio-group">
-          <label className="radio-option">
-            <input
-              type="radio"
-              checked={mode === "new"}
-              onChange={() => setMode("new")}
-            />
-            New document
-          </label>
-          <label className="radio-option">
-            <input
-              type="radio"
-              checked={mode === "version"}
-              onChange={() => setMode("version")}
-            />
-            New version of an existing title
-          </label>
-        </div>
+        <section className="form-section">
+          <p className="form-section-title">Identity</p>
+          <div className="radio-group">
+            <label className="radio-option">
+              <input
+                type="radio"
+                checked={mode === "new"}
+                onChange={() => setMode("new")}
+              />
+              New document
+            </label>
+            <label className="radio-option">
+              <input
+                type="radio"
+                checked={mode === "version"}
+                onChange={() => setMode("version")}
+              />
+              New version of an existing title
+            </label>
+          </div>
 
-        <div className="field">
-          <label htmlFor="title">Title</label>
-          <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
-        </div>
+          <div className="field">
+            <label htmlFor="title">Title</label>
+            <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
 
-        <div className="field-row">
-          <div className="field">
-            <label htmlFor="classification">Classification</label>
-            <select
-              id="classification"
-              value={classification}
-              onChange={(e) => setClassification(e.target.value)}
-            >
-              {CLASSIFICATIONS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="effective-date">Effective date</label>
-            <input
-              id="effective-date"
-              type="date"
-              value={effectiveDate}
-              onChange={(e) => setEffectiveDate(e.target.value)}
-            />
-          </div>
-        </div>
+          {mode === "version" && (
+            <div className="field">
+              <label htmlFor="version">Version</label>
+              <input
+                id="version"
+                value={version}
+                onChange={(e) => setVersion(e.target.value)}
+                placeholder="Leave blank to auto-increment"
+              />
+            </div>
+          )}
+        </section>
 
-        <div className="field-row">
-          <div className="field">
-            <label htmlFor="departments">Allowed departments</label>
-            <input
-              id="departments"
-              value={allowedDepartments}
-              onChange={(e) => setAllowedDepartments(e.target.value)}
-              placeholder="Finance, Executive"
-            />
+        <section className="form-section">
+          <p className="form-section-title">Classification &amp; access</p>
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="classification">Classification</label>
+              <select
+                id="classification"
+                value={classification}
+                onChange={(e) => setClassification(e.target.value)}
+              >
+                {CLASSIFICATIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="effective-date">Effective date</label>
+              <input
+                id="effective-date"
+                type="date"
+                value={effectiveDate}
+                onChange={(e) => setEffectiveDate(e.target.value)}
+              />
+            </div>
           </div>
-          <div className="field">
-            <label htmlFor="roles">Allowed roles</label>
-            <input
-              id="roles"
-              value={allowedRoles}
-              onChange={(e) => setAllowedRoles(e.target.value)}
-              placeholder="Finance, Executive"
-            />
-          </div>
-        </div>
-        <p className="help-text">
-          Leave either blank to mean "no restriction on that axis." Comma-separated.
-        </p>
 
-        {mode === "version" && (
-          <div className="field">
-            <label htmlFor="version">Version</label>
-            <input
-              id="version"
-              value={version}
-              onChange={(e) => setVersion(e.target.value)}
-              placeholder="Leave blank to auto-increment"
-            />
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="departments">Allowed departments</label>
+              <input
+                id="departments"
+                value={allowedDepartments}
+                onChange={(e) => setAllowedDepartments(e.target.value)}
+                placeholder="Finance, Executive"
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="roles">Allowed roles</label>
+              <input
+                id="roles"
+                value={allowedRoles}
+                onChange={(e) => setAllowedRoles(e.target.value)}
+                placeholder="Finance, Executive"
+              />
+            </div>
           </div>
-        )}
+          <p className="help-text">
+            Leave either blank to mean "no restriction on that axis." Comma-separated.
+          </p>
+        </section>
 
-        <div className="radio-group">
-          <label className="radio-option">
-            <input
-              type="radio"
-              checked={contentSource === "file"}
-              onChange={() => setContentSource("file")}
-            />
-            Upload a file
-          </label>
-          <label className="radio-option">
-            <input
-              type="radio"
-              checked={contentSource === "text"}
-              onChange={() => setContentSource("text")}
-            />
-            Paste text
-          </label>
-        </div>
+        <section className="form-section">
+          <p className="form-section-title">Content</p>
+          <div className="radio-group">
+            <label className="radio-option">
+              <input
+                type="radio"
+                checked={contentSource === "file"}
+                onChange={() => setContentSource("file")}
+              />
+              Upload a file
+            </label>
+            <label className="radio-option">
+              <input
+                type="radio"
+                checked={contentSource === "text"}
+                onChange={() => setContentSource("text")}
+              />
+              Paste text
+            </label>
+          </div>
 
-        {contentSource === "file" ? (
-          <div className="field">
-            <label htmlFor="file">File (.txt, .md, .pdf, .docx)</label>
-            <input
-              id="file"
-              type="file"
-              accept=".txt,.md,.pdf,.docx"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            />
-          </div>
-        ) : (
-          <div className="field">
-            <label htmlFor="text-content">Document text</label>
-            <textarea
-              id="text-content"
-              rows={5}
-              value={textContent}
-              onChange={(e) => setTextContent(e.target.value)}
-            />
-          </div>
-        )}
+          {contentSource === "file" ? (
+            <div className="field">
+              <label htmlFor="file">File (.txt, .md, .pdf, .docx)</label>
+              <input
+                id="file"
+                type="file"
+                accept=".txt,.md,.pdf,.docx"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+            </div>
+          ) : (
+            <div className="field">
+              <label htmlFor="text-content">Document text</label>
+              <textarea
+                id="text-content"
+                rows={5}
+                value={textContent}
+                onChange={(e) => setTextContent(e.target.value)}
+              />
+            </div>
+          )}
+        </section>
 
         <button className="btn-primary" type="submit" disabled={submitting}>
           {submitting ? "Uploading..." : "Upload document"}
