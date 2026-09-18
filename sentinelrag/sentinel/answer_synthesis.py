@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import re
 from typing import List
 
+from .citation_validator import validate_citations
 from .llm_client import LLMClient
 from .models import Document
 
@@ -55,7 +55,7 @@ class AnswerSynthesisAgent:
         except Exception:
             return self._template_answer(evidence, superseded)
 
-        return self._validate_citations(raw, evidence)
+        return validate_citations(raw, evidence)
 
     def _template_answer(self, evidence: List[Document], superseded: List[Document]) -> str:
         parts = [f"{d.content} (Source: {d.title} v{d.version}, {d.document_id})" for d in evidence]
@@ -63,15 +63,4 @@ class AnswerSynthesisAgent:
         if superseded:
             sup = ", ".join(f"{d.document_id} (v{d.version}, {d.effective_date})" for d in superseded)
             answer += f" Note: {sup} is superseded."
-        return answer
-
-    def _validate_citations(self, answer: str, evidence: List[Document]) -> str:
-        """Deterministic citation validator: strips any [DOC-xxx]-style
-        citation that does not correspond to a document actually present in
-        the authorized evidence supplied for this call. Guards against the
-        model hallucinating or referencing a document it never saw."""
-        valid_ids = {d.document_id for d in evidence}
-        cited_ids = set(re.findall(r"\[([A-Za-z0-9\-]+)\]", answer))
-        for bad_id in cited_ids - valid_ids:
-            answer = answer.replace(f"[{bad_id}]", "[unverified citation removed]")
         return answer
