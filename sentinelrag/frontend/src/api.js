@@ -1,4 +1,7 @@
-const API_BASE = "http://localhost:8000";
+// VITE_API_BASE is set at build time (Vercel: an environment variable on
+// the project). Falls back to the local backend so `npm run dev` needs no
+// configuration.
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
 async function parseErrorDetail(response) {
   try {

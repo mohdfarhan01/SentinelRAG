@@ -1,0 +1,34 @@
+# Render Blueprint for the SentinelRAG backend.
+# Deploy: Render dashboard -> New -> Blueprint -> select this repo.
+#
+# The frontend is NOT deployed here -- it's a static build and belongs on
+# Vercel instead (see README.md "Deployment" section).
+#
+# Free-tier caveat: Render's free web services have an ephemeral
+# filesystem (no persistent disk on the free plan, and the instance can
+# be restarted by Render's infra). sentinelrag.db and chroma_data/ can
+# therefore be wiped on restart. The start command below re-runs seed.py
+# every boot -- it's idempotent (skips seeding if data already exists),
+# so a wipe just means the demo corpus + demo accounts (u102/u205/u301/
+# admin) come back automatically. Anything added at runtime (admin
+# uploads, self-signed-up accounts) does NOT survive a wipe on the free
+# tier. Upgrade to a paid instance + persistent disk to fix this.
+services:
+  - type: web
+    name: sentinelrag-api
+    runtime: python
+    plan: free
+    rootDir: sentinelrag
+    buildCommand: pip install -r requirements.txt
+    startCommand: python seed.py && uvicorn api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false          # set to your Vercel URL after the frontend is deployed
+      - key: LLM_PROVIDER
+        value: deepseek
+      - key: BAI_API_KEY
+        sync: false          # set manually in the Render dashboard -- do not commit keys
+      - key: GEMINI_API_KEY
+        sync: false

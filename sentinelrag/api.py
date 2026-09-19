@@ -35,12 +35,16 @@ DB_PATH = os.getenv("SENTINELRAG_DB", "sentinelrag.db")
 
 app = FastAPI(title="SentinelRAG API")
 
-# The React dev server runs on a different origin (port) than this API.
-# Restricted to localhost dev ports -- not a wildcard -- since this still
-# carries real bearer tokens.
+# The frontend runs on a different origin than this API (a different port
+# locally; a different domain entirely once deployed, e.g. Vercel). Kept
+# as an explicit allow-list -- not a wildcard -- since this carries real
+# bearer tokens. CORS_ORIGINS is a comma-separated env var for deployment
+# (e.g. "https://sentinelrag.vercel.app"); the two localhost dev ports
+# are always included so local development is unaffected.
+_extra_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", *_extra_origins],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
